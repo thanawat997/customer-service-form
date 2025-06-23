@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title>ข้อมูลลูกค้ารับบริการ</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+  <style>
+    body { margin:0; font-family:sans-serif; background:#f9f9f9; }
+    .container { max-width:600px; margin:20px auto; padding:15px; background:white; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    section { display:none; margin-bottom:2em; padding:1em; border:1px solid #ccc; border-radius:10px; }
+    section.active { display:block; }
+    label { display:block; margin-top:10px; }
+    input, select, textarea { width:100%; padding:6px; margin-top:4px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px; font-size:16px; }
+    .buttons { text-align:right; margin-top:1em; }
+    .buttons button { padding:8px 16px; margin-left:8px; font-size:16px; }
+    .error { color:red; font-size:0.9em; }
+
+    #successMessage {
+      text-align: center;
+      padding: 20px;
+      background-color: #e6ffe6;
+      border: 1px solid #66cc66;
+      border-radius: 8px;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    #successMessage h3 {
+      color: #338833;
+      margin-top: 0;
+    }
+    #successMessage button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+    #fillAgainBtn {
+      background-color: #007bff;
+      color: white;
+    }
+    #closeBtn {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      display: none;
+    }
+    #loadingMessage {
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      color: #333;
+      font-size: 1.2em;
+    }
+    #loadingMessage .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-top: 4px solid #007bff;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px auto;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <form id="serviceForm">
+
+      <section class="active" data-step="1">
+        <h3>ข้อมูลลูกค้ารับบริการ</h3>
+        <label>วันที่รับบริการ : <br><input type="text" name="วันที่รับบริการ" required></label>
+        <label>ช่องทางการติดต่อของลูกค้า : <br><select name="ช่องทางการติดต่อของลูกค้า" required>
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="นัดหมาย CS">นัดหมาย CS</option>
+          <option value="Walk in">Walk in</option>
+          <option value="Follow">Follow</option>
+          <option value="B2B">B2B</option>
+          <option value="UCD">UCD</option>
+          <option value="NCD">NCD</option>
+        </select></label>
+      </section>
+
+      <section data-step="2">
+        <h3>ข้อมูลตรวจสภาพ</h3>
+        <label>สาขา : <br><select name="สาขา" required>
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="002 Lotus บางนา">002 Lotus บางนา</option>
+          <option value="004 Big C สะพานควาย">004 Big C สะพานควาย</option>
+          <option value="008 Big C รังสิต">008 Big C รังสิต</option>
+          <option value="013 Lotus พระราม 2">013 Lotus พระราม 2</option>
+          <option value="014 Lotus มีนบุรี">014 Lotus มีนบุรี</option>
+          <option value="099 สำนักงานใหญ่">099 สำนักงานใหญ่</option>
+        </select></label>
+
+        <label>สถานที่ให้บริการ : <br><select name="สถานที่ให้บริการ" required>
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="เข้าสาขา">เข้าสาขา</option>
+          <option value="On site">On site</option>
+        </select></label>
+
+        <label>ผู้รับเคส : <br><select name="ผู้รับเคส" required>
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="JC250087,ปิยะชัย">JC250087,ปิยะชัย</option>
+          <option value="JC220018,วิษณุ">JC220018,วิษณุ</option>
+          <option value="JC240073,พรชัย">JC240073,พรชัย</option>
+          <option value="JC250085,ณัฐพล">JC250085,ณัฐพล</option>
+          <option value="JC220017,ณัฐพัชร์">JC220017,ณัฐพัชร์</option>
+          <option value="JC220026,วีรวุฒิ">JC220026,วีรวุฒิ</option>
+          <option value="JC250086,นูรซี">JC250086,นูรซี</option>
+          <option value="JC240074,ศุภรัฐ">JC240074,ศุภรัฐ</option>
+          <option value="JC240071,อนันต์">JC240071,อนันต์</option>
+          <option value="JC220019,จุฬดิษฐ์">JC220019,จุฬดิษฐ์</option>
+          <option value="JC220011,สุริยา">JC220011,สุริยา</option>
+          <option value="JC220022,สัมฤทธิ์">JC220022,สัมฤทธิ์</option>
+          <option value="JC240075,วีระยุทธ">JC240075,วีระยุทธ</option>
+          <option value="JC220025,นาวิน">JC220025,นาวิน</option>
+          <option value="JC220034,ฐาปนา">JC220034,ฐาปนา</option>
+        </select></label>
+
+        <label>ช่างผู้ตรวจรถ : <br><select name="ช่างผู้ตรวจรถ" required>
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="JC250087,ปิยะชัย">JC250087,ปิยะชัย</option>
+          <option value="JC220018,วิษณุ">JC220018,วิษณุ</option>
+          <option value="JC240073,พรชัย">JC240073,พรชัย</option>
+          <option value="JC250085,ณัฐพล">JC250085,ณัฐพล</option>
+          <option value="JC220017,ณัฐพัชร์">JC220017,ณัฐพัชร์</option>
+          <option value="JC220026,วีรวุฒิ">JC220026,วีรวุฒิ</option>
+          <option value="JC250086,นูรซี">JC250086,นูรซี</option>
+          <option value="JC240074,ศุภรัฐ">JC240074,ศุภรัฐ</option>
+          <option value="JC240071,อนันต์">JC240071,อนันต์</option>
+          <option value="JC220019,จุฬดิษฐ์">JC220019,จุฬดิษฐ์</option>
+          <option value="JC220011,สุริยา">JC220011,สุริยา</option>
+          <option value="JC220022,สัมฤทธิ์">JC220022,สัมฤทธิ์</option>
+          <option value="JC240075,วีระยุทธ">JC240075,วีระยุทธ</option>
+          <option value="JC220025,นาวิน">JC220025,นาวิน</option>
+          <option value="JC220034,ฐาปนา">JC220034,ฐาปนา</option>
+        </select></label>
+
+        <label>สถานะลูกค้า : <br><select name="สถานะลูกค้า" required>
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="พร้อมจอดภายใน 7วัน">พร้อมจอดภายใน 7วัน</option>
+          <option value="พร้อมจอดภายใน 7-15 วัน">พร้อมจอดภายใน 7-15 วัน</option>
+          <option value="พร้อมจอดมากกว่า 15วันขึ้นไป">พร้อมจอดมากกว่า 15วันขึ้นไป</option>
+        </select></label>
+
+        <label>ชื่อลูกค้า : <br><input type="text" name="ชื่อลูกค้า" required></label>
+        <label>เบอร์โทร : <br><input type="text" name="เบอร์โทร" inputmode="numeric" pattern="[0-9\-]*" autocomplete="off" maxlength="12" required></label>
+
+        <label>ทะเบียนรถ : <br><input type="text" name="ทะเบียนรถ" required pattern="^[0-9ก-ฮ]+$" id="plateInput" required></label>
+
+        <label>ยี่ห้อ : <br><select name="ยี่ห้อ" required>
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="Audi">Audi</option>
+          <option value="BMW">BMW</option>
+          <option value="BYD">BYD</option>
+          <option value="Chevrolet">Chevrolet</option>
+          <option value="Citroen">Citroen</option>
+          <option value="Deepal">Deepal</option>
+          <option value="Ford">Ford</option>
+          <option value="Foton">Foton</option>
+          <option value="Haval">Haval</option>
+          <option value="Hino">Hino</option>
+          <option value="Honda">Honda</option>
+          <option value="Hummer">Hummer</option>
+          <option value="Hyundai">Hyundai</option>
+          <option value="Isuzu">Isuzu</option>
+          <option value="Kia">Kia</option>
+          <option value="Land Rover">Land Rover</option>
+          <option value="Lexus">Lexus</option>
+          <option value="Maserati">Maserati</option>
+          <option value="Mazda">Mazda</option>
+          <option value="Mercedes-Benz">Mercedes-Benz</option>
+          <option value="MG">MG</option>
+          <option value="Mini">Mini</option>
+          <option value="Mitsubishi">Mitsubishi</option>
+          <option value="Neta">Neta</option>
+          <option value="Nissan">Nissan</option>
+          <option value="Peugeot">Peugeot</option>
+          <option value="Porsche">Porsche</option>
+          <option value="Proton">Proton</option>
+          <option value="Saab" >9-3 linear</option>
+          <option value="Ssangyong">Ssangyong</option>
+          <option value="Subaru">Subaru</option>
+          <option value="Suzuki">Suzuki</option>
+          <option value="Tata">Tata</option>
+          <option value="Tesla">Tesla</option>
+          <option value="Toyota">Toyota</option>
+          <option value="Volkswagen">Volkswagen</option>
+          <option value="Volvo">Volvo</option>
+        </select></label>
+
+        <label>รุ่น : <br><select name="รุ่น" required>
+          <option value="">-- กรุณาเลือก --</option>
+        </select></label>
+
+        <label>รุ่นย่อย : <br><input type="text" name="รุ่นย่อย" required></label>
+
+        <label>ปีรถ : <br><select name="ปีรถ" required>
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+          <option value="2019">2019</option>
+          <option value="2018">2018</option>
+          <option value="2017">2017</option>
+          <option value="2016">2016</option>
+          <option value="2015">2015</option>
+          <option value="2014">2014</option>
+          <option value="2013">2013</option>
+          <option value="2012">2012</option>
+          <option value="2011">2011</option>
+          <option value="2010">2010</option>
+          <option value="2009">2009</option>
+          <option value="2008">2008</option>
+          <option value="2007">2007</option>
+          <option value="2006">2006</option>
+          <option value="2005">2005</option>
+          <option value="2004">2004</option>
+          <option value="2003">2003</option>
+          <option value="2002">2002</option>
+          <option value="2001">2001</option>
+          <option value="2000">2000</option>
+          <option value="1999">1999</option>
+          <option value="1998">1998</option>
+          <option value="1997">1997</option>
+          <option value="1996">1996</option>
+          <option value="1995">1995</option>
+          <option value="1994">1994</option>
+          <option value="1993">1993</option>
+          <option value="1992">1992</option>
+          <option value="1991">1991</option>
+          <option value="1990">1990</option>
+        </select></label>
+
+        <label>เลขไมล์ : <br><input type="text" name="เลขไมล์" required></label>
+
+        <label>สถานะเล่มรถ : <br><select name="สถานะเล่มรถ" required>
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="มีเล่ม">มีเล่ม</option>
+          <option value="มีเล่ม แต่ไม่ได้นำมา (สำเนา)">มีเล่ม แต่ไม่ได้นำมา (สำเนา)</option>
+          <option value="ติดไฟแนนซ์">ติดไฟแนนซ์</option>
+        </select></label>
+      </section>
+
+      <section data-step="3">
+        <h3>ติดไฟแนนซ์</h3>
+        <label>ชื่อไฟแนนซ์ : <br><input type="text" name="ชื่อไฟแนนซ์" id="financeNameInput"></label>
+        <label>ยอดไฟแนนซ์ : <br><input type="text" name="ยอดไฟแนนซ์" id="financeAmountInput"></label>
+      </section>
+
+      <section data-step="4">
+        <h3>ข้อมูลประกันภัย</h3>
+        <label>ข้อมูลประกันภัย : <br><select name="ข้อมูลประกันภัย" required id="insuranceStatusSelect">
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="ไม่มีประกันภัย">ไม่มีประกันภัย</option>
+          <option value="ขายพร้อมประกัน">ขายพร้อมประกัน</option>
+          <option value="ไม่ขายพร้อมประกัน">ไม่ขายพร้อมประกัน</option>
+        </select></label>
+      </section>
+
+      <section data-step="5">
+        <h3>ขายพร้อมประกัน</h3>
+        <label>ประกันภัย : <br><select name="ประกันภัย" id="insuranceTypeSelect">
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="ชั้น1">ชั้น1</option>
+          <option value="ชั้น2+">ชั้น2+</option>
+          <option value="ชั้น2">ชั้น2</option>
+          <option value="ชั้น3+">ชั้น3+</option>
+          <option value="ชั้น3">ชั้น3</option>
+        </select></label>
+
+        <label>ชื่อบริษัทประกันภัย : <br><input type="text" name="ชื่อบริษัทประกันภัย" id="insuranceCompanyNameInput"></label>
+      </section>
+
+      <section data-step="6">
+        <h3>ข้อมูลส่วนท้าย</h3>
+        <label>วันหมดอายุภาษี : <br><input type="text" name="วันหมดอายุภาษี" required></label>
+
+        <label>ราคาคาดหวัง : <br><input type="text" name="ราคาคาดหวัง" required></label>
+
+        <label>เหตุผลในการขายรถ : <br><select name="เหตุผลในการขายรถ" required>
+          <option value="">-- กรุณาเลือก --</option>
+          <option value="ลดภาระ">ลดภาระ</option>
+          <option value="ต้องการใช้เงินก้อน">ต้องการใช้เงินก้อน</option>
+          <option value="ซื้อมาเพื่อขายต่อ">ซื้อมาเพื่อขายต่อ</option>
+          <option value="ขายเพื่อซื้อรถคันใหม่">ขายเพื่อซื้อรถคันใหม่</option>
+          <option value="รถเสียบ่อย ไม่อยากซ่อม">รถเสียบ่อย ไม่อยากซ่อม</option>
+          <option value="ไม่มีที่จอด">ไม่มีที่จอด</option>
+          <option value="ไม่ค่อยได้ใช้งาน">ไม่ค่อยได้ใช้งาน</option>
+          <option value="เพื่อจัดการมรดก">เพื่อจัดการมรดก</option>
+          <option value="ปลดระวางตามรอบบริษัท">ปลดระวางตามรอบบริษัท</option>
+          <option value="อื่นๆ">อื่นๆ</option>
+        </select></label>
+
+        <label>หมายเหตุ : <br><textarea name="หมายเหตุ"></textarea></label>
+
+        <label>รูปหน้ารถ : <br><input type="file" id="imageUpload" name="รูปหน้ารถ" accept="image/*" required></label>
+      </section>
+
+      <div class="buttons">
+        <button type="button" id="prevBtn" style="display:none">ย้อนกลับ</button>
+        <button type="button" id="nextBtn">ถัดไป</button>
+        <button type="submit" id="submitBtn" style="display:none">บันทึก</button>
+      </div>
+    </form>
+
+    <div id="successMessage" style="display:none;">
+        <h3>บันทึกข้อมูลเรียบร้อยแล้ว!</h3>
+        <button id="fillAgainBtn">กรอกอีกครั้ง</button>
+        <button id="closeBtn">ปิด</button>
+    </div>
+
+  </div>
+
+  <div id="loadingOverlay">
+    <div id="loadingMessage">
+      <div class="spinner"></div>
+      <p>กำลังอัปโหลดรูปภาพและบันทึกข้อมูล... กรุณารอสักครู่</p>
+    </div>
+  </div>
+
+  <script>
+    const modelsByBrand = {
+      "Audi": ["A4", "A6", "Q3", "Q5"],
+      "BMW": ["Series1", "Series3", "Series4", "Series5", "Series7", "Series8", "X1", "X3", "X4", "X5", "X6", "Z4", "M3", "M5", "M6", "i8", "iX3"],
+      "BYD": ["Atto 3", "Dolphin", "E6", "Seal", "Sealion 6"],
+      "Chevrolet": ["Captiva", "Colorado", "Cruze", "Optra", "Sonic", "Trailblazer"],
+      "Citroen": ["DS", "C8"],
+      "Deepal": ["L07", "S07"],
+      "Ford": ["Ecosport", "Escape", "Everest", "Fiesta", "Focus", "Ranger"],
+      "Foton": ["Saga"],
+      "Haval": ["H6", "Jolion"],
+      "Hino": ["300 Innovator"],
+      "Honda": ["Accord", "BR-V", "Brio", "Brio Amaze", "CR-V", "City", "City Hatchback", "City ZX", "Civic", "Civic hatchback", "Freed", "HR-V", "Jazz", "Mobilio", "Odyssey", "Stepwagon Spada"],
+      "Hummer": ["H3"],
+      "Hyundai": ["Creta", "H-1", "KONA", "Staria"],
+      "Isuzu": ["D-Max", "Dragon Eye", "G Dragon", "MU-7", "MU-X"],
+      "Kia": ["Carnival", "Grand Carnival", "K2500", "Sorento"],
+      "Land Rover": ["Freelander"],
+      "Lexus": ["RX270"],
+      "Maserati": ["Levante Granlusso"],
+      "Mazda": ["BT-50", "CX-3", "CX-30", "CX-5", "CX-8", "MX-5", "Mazda2", "Mazda2 Hatchback", "Mazda3", "Mazda3 Hatchback", "Tribute"],
+      "Mercedes-Benz": ["A-Class", "C-Class", "CLA-Class", "CLK-Class", "CLS-Class", "E-Class", "GLA-Class", "GLC-Class", "S-Class", "SLK-Class", "Vito"],
+      "MG": ["Extender", "GS", "HS", "MG3", "MG4", "MG5", "MG6", "VS", "ZS"],
+      "Mini": ["Austin", "Cooper", "Countryman"],
+      "Mitsubishi": ["Attrage", "Cyclone", "Lancer", "Lancer EX", "Mirage", "Pajero Sport", "Space Wagon", "Strada", "Triton", "Xpender"],
+      "Neta": ["V"],
+      "Nissan": ["Almera", "Cefiro", "Frontier", "Juke", "Kick", "March", "NV", "Navara", "Note", "Sunny", "Sylphy", "Teana", "Terra", "Tiida", "Urvan", "X-Trail"],
+      "Peugeot": ["3008"],
+      "Porsche": ["Cayenne","Macan"],
+      "Proton": ["Gen2","Savvy"],
+      "Saab" : ["9-3 linear"],
+      "Ssangyong": ["Stavic"],
+      "Subaru": ["Forester", "Legacy", "XV"],
+      "Suzuki": ["Carry", "Ciaz", "Ertiga", "Swift", "Vitara"],
+      "Tata": ["Superace"],
+      "Tesla": ["Model 3", "Model Y"],
+      "Toyota": ["Alphard", "Avanza", "C-HR", "Camry", "Commuter", "Corolla", "Corolla Altis", "Corolla Cross", "Corona, Estima", "Fortuner", "Hiace", "Hilux Champ", "Hilux Revo", "Hilux Tiger", "Hilux Vigo", "Innova", "MR2", "Majesty", "Mighty-X", "Prius", "Sienta", "Soluna", "Vellfire", "Veloz", "Ventury", "Vios", "Voxy", "Wish", "Yaris", "Yaris Ative", "Yaris Cross"],
+      "Volkswagen": ["Caravella", "Passat", "Scirocco", "Tiguan", "Vento"],
+      "Volvo": ["C70", "EX30", "S80", "V40", "V60", "XC40", "XC60"]
+    };
+
+    function loadModelOptions(brand) {
+      const modelSelect = document.querySelector('select[name="รุ่น"]');
+      modelSelect.innerHTML = '<option value="">-- กรุณาเลือก --</option>';
+
+      if (modelsByBrand[brand]) {
+        modelsByBrand[brand].forEach(model => {
+          const option = document.createElement("option");
+          option.value = model;
+          option.textContent = model;
+          modelSelect.appendChild(option);
+        });
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelector('select[name="ยี่ห้อ"]').addEventListener("change", function () {
+        loadModelOptions(this.value);
+      });
+
+      flatpickr("input[name='วันที่รับบริการ'], input[name='วันหมดอายุภาษี']", {
+        dateFormat: 'd/m/Y',
+        locale: 'th',
+        disableMobile: true
+      });
+
+      const phoneInput = document.querySelector('input[name="เบอร์โทร"]');
+      if (phoneInput) {
+        phoneInput.addEventListener("input", function (e) {
+          let value = this.value.replace(/\D/g, "");
+          value = value.substring(0, 10);
+          if (value.length > 6) {
+            this.value = value.slice(0, 3) + "-" + value.slice(3, 6) + "-" + value.slice(6);
+          } else if (value.length > 3) {
+            this.value = value.slice(0, 3) + "-" + value.slice(3);
+          } else {
+            this.value = value;
+          }
+        });
+      }
+
+      const plateInput = document.getElementById("plateInput");
+      if (plateInput) {
+        plateInput.addEventListener("input", function () {
+          let cleanValue = this.value.replace(/[^0-9ก-ฮ]/g, "");
+          this.value = cleanValue;
+        });
+      }
+
+      const mileageInput = document.querySelector('input[name="เลขไมล์"]');
+      if (mileageInput) {
+        mileageInput.addEventListener("input", function (e) {
+          let value = this.value.replace(/,/g, "").replace(/\D/g, "");
+          if (value) {
+            this.value = Number(value).toLocaleString("en-US");
+          } else {
+            this.value = "";
+          }
+        });
+      }
+
+      const financeInput = document.querySelector('input[name="ยอดไฟแนนซ์"]');
+      if (financeInput) {
+        financeInput.addEventListener("input", function (e) {
+          let value = this.value.replace(/,/g, "").replace(/\D/g, "");
+          if (value) {
+            this.value = Number(value).toLocaleString("en-US");
+          } else {
+            this.value = "";
+          }
+        });
+      }
+
+      const expectedPriceInput = document.querySelector('input[name="ราคาคาดหวัง"]');
+      if (expectedPriceInput) {
+        expectedPriceInput.addEventListener("input", function (e) {
+          let value = this.value.replace(/,/g, "").replace(/\D/g, "");
+          if (value) {
+            this.value = Number(value).toLocaleString("en-US");
+          } else {
+            this.value = "";
+          }
+        });
+      }
+
+      const sections = Array.from(document.querySelectorAll('section'));
+      let current = 0;
+      let stepHistory = [0]; 
+
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const submitBtn = document.getElementById('submitBtn');
+      const serviceForm = document.getElementById('serviceForm');
+      const successMessageDiv = document.getElementById('successMessage');
+      const fillAgainBtn = document.getElementById('fillAgainBtn');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+
+      const financeNameInput = document.getElementById('financeNameInput');
+      const financeAmountInput = document.getElementById('financeAmountInput');
+      const insuranceStatusSelect = document.getElementById('insuranceStatusSelect');
+      const insuranceTypeSelect = document.getElementById('insuranceTypeSelect');
+      const insuranceCompanyNameInput = document.getElementById('insuranceCompanyNameInput');
+
+      function setRequiredForConditionalFields() {
+        financeNameInput.removeAttribute('required');
+        financeAmountInput.removeAttribute('required');
+        insuranceTypeSelect.removeAttribute('required');
+        insuranceCompanyNameInput.removeAttribute('required');
+
+        // Check if "ติดไฟแนนซ์" section (step 3) is supposed to be active based on current selection
+        const bookStatus = document.querySelector('select[name="สถานะเล่มรถ"]').value;
+        if (bookStatus === "ติดไฟแนนซ์") {
+          // This ensures that if we are currently on or moving to a step where this section *could* be active
+          // and the condition is met, its fields become required.
+          if (current >= sections.findIndex(s => s.dataset.step === "3")) { // Check if we are at or past step 2, where this condition is set
+            financeNameInput.setAttribute('required', 'required');
+            financeAmountInput.setAttribute('required', 'required');
+          }
+        }
+
+        // Check if "ขายพร้อมประกัน" section (step 5) is supposed to be active based on current selection
+        const insuranceStatus = document.querySelector('select[name="ข้อมูลประกันภัย"]').value;
+        if (insuranceStatus === "ขายพร้อมประกัน") {
+          // Similar logic for insurance fields
+          if (current >= sections.findIndex(s => s.dataset.step === "5")) { // Check if we are at or past step 4
+            insuranceTypeSelect.setAttribute('required', 'required');
+            insuranceCompanyNameInput.setAttribute('required', 'required');
+          }
+        }
+      }
+
+      function showStep(idx) {
+        sections.forEach((sec, i) => sec.classList.toggle('active', i === idx));
+        prevBtn.style.display = stepHistory.length > 1 ? 'inline-block' : 'none';
+        nextBtn.style.display = idx < sections.length - 1 ? 'inline-block' : 'none';
+        submitBtn.style.display = idx === sections.length - 1 ? 'inline-block' : 'none';
+        console.log(`Showing step: ${idx}, stepHistory: [${stepHistory.join(', ')}]`);
+        setRequiredForConditionalFields(); 
+      }
+
+      showStep(current);
+
+      prevBtn.addEventListener('click', () => {
+        console.log("Prev button clicked.");
+        if (stepHistory.length > 1) {
+          stepHistory.pop(); // Remove current step
+          current = stepHistory[stepHistory.length - 1]; // Go to previous step
+          showStep(current);
+        }
+      });
+
+      nextBtn.addEventListener('click', () => {
+        console.log("Next button clicked.");
+        const currentSection = sections[current];
+        const inputsInCurrentSection = currentSection.querySelectorAll('input[required], select[required], textarea[required]');
+
+        for (let e of inputsInCurrentSection) {
+          // Special handling for file input in next button validation
+          if (e.type === 'file') {
+            if (e.hasAttribute('required') && e.files.length === 0) {
+              alert(`กรุณาเลือกไฟล์สำหรับ "${e.name}"`);
+              e.focus();
+              return;
+            }
+          } else if (!e.value) {
+            alert(`กรุณากรอกข้อมูล "${e.name}" ในส่วนนี้ให้ครบ`);
+            e.focus();
+            return;
+          }
+        }
+
+        let nextIndex = current + 1;
+
+        if (currentSection.dataset.step === "2") {
+          const bookStatus = currentSection.querySelector('select[name="สถานะเล่มรถ"]').value;
+          if (bookStatus !== "ติดไฟแนนซ์") {
+            nextIndex = sections.findIndex(s => s.dataset.step === "4"); // Skip to insurance section (step 4)
+            if (nextIndex === -1) nextIndex = current + 2; // Fallback if section 4 not found
+          }
+        } else if (currentSection.dataset.step === "4") {
+          const insuranceStatus = currentSection.querySelector('select[name="ข้อมูลประกันภัย"]').value;
+          if (insuranceStatus !== "ขายพร้อมประกัน") {
+            nextIndex = sections.findIndex(s => s.dataset.step === "6"); // Skip to final section (step 6)
+            if (nextIndex === -1) nextIndex = current + 2; // Fallback if section 6 not found
+          }
+        }
+        
+        if (nextIndex < sections.length) {
+          current = nextIndex;
+          stepHistory.push(current);
+          showStep(current);
+        } else {
+          // If trying to go past the last step, just stay at the last step
+          current = sections.length - 1;
+          showStep(current);
+        }
+      });
+
+      serviceForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        console.log("Submit button clicked.");
+
+        // Final validation for the currently active section (should be the last section)
+        const currentSection = sections[current];
+        const inputsInActiveSection = currentSection.querySelectorAll('input[required], select[required], textarea[required]');
+        for (let elem of inputsInActiveSection) {
+          if (elem.type === 'file') {
+            if (elem.hasAttribute('required') && elem.files.length === 0) {
+                alert(`กรุณาเลือกไฟล์สำหรับ "${elem.name}"`);
+                elem.focus();
+                return;
+            }
+          } else if (!elem.value) {
+              alert(`กรุณากรอกข้อมูล "${elem.name}" ในส่วนนี้ให้ครบถ้วนก่อนบันทึก`);
+              elem.focus();
+              return;
+          }
+        }
+
+        const formData = new FormData(e.target);
+        const dataToSend = {};
+
+        for (let [key, value] of formData.entries()) {
+          // We'll handle 'รูปหน้ารถ' (file input) separately
+          if (key !== 'รูปหน้ารถ') {
+            if (key === 'เบอร์โทร') {
+                dataToSend[key] = value.replace(/-/g, '');
+            } else if (key === 'เลขไมล์' || key === 'ยอดไฟแนนซ์' || key === 'ราคาคาดหวัง') {
+                // Parse number after cleaning, or set to empty string if empty
+                const cleanedValue = value ? value.replace(/,/g, '') : '';
+                dataToSend[key] = cleanedValue ? parseInt(cleanedValue, 10) : '';
+            } else {
+                dataToSend[key] = value;
+            }
+          }
+        }
+        console.log("Data to send (excluding image file initially):", dataToSend);
+
+        const imageInput = document.getElementById('imageUpload');
+        loadingOverlay.style.display = 'flex'; // Show loading overlay immediately
+
+        if (imageInput.files.length > 0) {
+          const file = imageInput.files[0];
+          const reader = new FileReader();
+
+          reader.onloadend = () => {
+            const base64Data = reader.result;
+            const fileName = `${Date.now()}_${file.name}`;
+            console.log("Image selected, attempting upload...");
+
+            google.script.run
+              .withSuccessHandler(function(url) {
+                console.log("Image upload successful, URL:", url);
+                // Attach imageData and imageFileName to dataToSend for submitForm
+                dataToSend['imageData'] = base64Data; // Send base64 data to submitForm
+                dataToSend['imageFileName'] = fileName; // Send file name
+                // No need to set 'รูปหน้ารถURL' here, Code.gs will handle it after uploadImage
+                submitFormData(dataToSend);
+              })
+              .withFailureHandler(function(error) {
+                loadingOverlay.style.display = 'none';
+                alert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ: ' + error.message);
+                console.error('Image upload error:', error);
+              })
+              .uploadImage(base64Data, fileName); // Call uploadImage first
+          };
+          reader.readAsDataURL(file);
+        } else {
+          // If no image is uploaded, or not required, submit form data directly
+          // Ensure imageData and imageFileName are not present if no file selected
+          dataToSend['imageData'] = null; 
+          dataToSend['imageFileName'] = null;
+          console.log("No image selected, submitting form directly.");
+          submitFormData(dataToSend);
+        }
+      });
+
+      function submitFormData(data) {
+        console.log("Calling google.script.run.submitForm with final data:", data);
+        google.script.run
+          .withSuccessHandler(function(response) {
+            loadingOverlay.style.display = 'none';
+            console.log("submitForm success response:", response);
+            if (response === 'บันทึกข้อมูลเรียบร้อยแล้ว') {
+              serviceForm.style.display = 'none';
+              successMessageDiv.style.display = 'block';
+            } else {
+              alert('เกิดข้อผิดพลาด: ' + response);
+            }
+          })
+          .withFailureHandler(function(error) {
+            loadingOverlay.style.display = 'none';
+            alert('เกิดข้อผิดพลาดในการส่งข้อมูล: ' + error.message);
+            console.error('Form submission error:', error);
+          })
+          .submitForm(data);
+      }
+
+      fillAgainBtn.addEventListener('click', () => {
+        console.log("Fill Again button clicked.");
+        serviceForm.reset();
+        successMessageDiv.style.display = 'none';
+        serviceForm.style.display = 'block';
+        current = 0;
+        stepHistory = [0];
+        showStep(current);
+        // No need to re-initialize flatpickr here, it's already bound to the elements
+        document.querySelector('select[name="รุ่น"]').innerHTML = '<option value="">-- กรุณาเลือก --</option>';
+        document.getElementById('imageUpload').value = ''; // Clear file input
+      });
+
+      // Add change listeners for conditional sections to update required attributes immediately
+      document.querySelector('select[name="สถานะเล่มรถ"]').addEventListener('change', setRequiredForConditionalFields);
+      document.getElementById('insuranceStatusSelect').addEventListener('change', setRequiredForConditionalFields);
+
+    });
+  </script>
+</body>
+</html>
